@@ -18,6 +18,7 @@ class App:
 
         self.map=Map(self._display_surf)
         self.character = Character(self._display_surf, 70, 70)
+        self.collision = Collisions(self._display_surf)
 
     def on_event(self, event):
         if event.type == pygame.QUIT:
@@ -33,6 +34,13 @@ class App:
                 self.character.move(70,0)
             if event.key == pygame.K_LEFT:
                 self.character.move(-70,0)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                print(pygame.mouse.get_pos())
+                self.collision.set_collision(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
+            if event.button == 3:
+                self.collision.del_collision(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
+
 
     def on_loop(self):
         pygame.display.update()
@@ -41,6 +49,8 @@ class App:
         self.map.background_image()
         self.map.background_grid()
         self.character.draw()
+        self.collision.draw()
+
 
 
 
@@ -80,6 +90,7 @@ class Map():
     def __init__(self, surface):
         self._display_surf = surface
 
+
     def background_grid(self):
         block_size = 70
         for x in range(0, ctypes.windll.user32.GetSystemMetrics(0), block_size):
@@ -91,6 +102,26 @@ class Map():
         bg_img = pygame.image.load('test.png')
         #bg_img = pygame.transform.scale(bg_img,(ctypes.windll.user32.GetSystemMetrics(0),ctypes.windll.user32.GetSystemMetrics(1)))
         self._display_surf.blit(bg_img,(0,0))
+
+class Collisions():
+    def __init__(self, surface):
+        self._display_surf = surface
+        self.collision_grid={}
+
+    def draw(self):
+        for x in self.collision_grid.values():
+            pygame.draw.rect(self._display_surf, (0, 0, 0), x)
+
+
+
+    def set_collision(self, x, y):
+        self.collision_grid[f'{x//70},{y//70}'] =pygame.Rect((x//70)*70, (y//70)*70, 70, 70)
+
+    def del_collision(self, x, y):
+        try:
+            del self.collision_grid[f'{x//70},{y//70}']
+        except:
+            pass
 
 if __name__ == "__main__":
     theApp = App()
